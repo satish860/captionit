@@ -1,9 +1,11 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import axios from "axios"
 import { useDropzone } from "react-dropzone"
+import { Upload } from "upload-js"
 
-const baseStyle:React.CSSProperties = {
+const baseStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
@@ -25,7 +27,7 @@ const thumb: React.CSSProperties = {
   borderRadius: 2,
   border: "1px solid #eaeaea",
   marginBottom: 8,
-  marginLeft: 50 ,
+  marginLeft: 50,
   width: "auto",
   height: "auto",
   padding: 4,
@@ -41,54 +43,108 @@ const thumbInner = {
 const img = {
   display: "block",
   width: 400,
-  height: 400, 
-};
+  height: 400,
+}
 
 const thumbsContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",
-  marginTop: 16,
+  margin: "0 5px", // Update this line
+  flex: "1 1 33%",
+}
+
+const captionStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  margin: "16px 0",
+  padding: 10,
+
+}
+
+const thirdContainer: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  margin: "10px 0", // Update this line
+  flex: "1 1 33%", 
+
 }
 
 interface ExtendedFile extends File {
-  preview: string;
+  preview: string
 }
 
 export default function IndexPage() {
   const [files, setFiles] = useState<ExtendedFile[]>([])
+  const [caption, setCaption] = useState("")
+  const [randomText, setRandomText] = useState("")
+
+  const upload = Upload({
+    apiKey: "public_12a1yDhFXdiwiqc5cp4roMGKbtde",
+  })
+
+  const uploadComplete = async (fileUrl: string) => {
+    var response = await axios.post("api/", {
+      url: fileUrl,
+    })
+    const result = response.data
+    const caption = "Caption: "
+    const captionIndex = result.indexOf(caption)
+    let extractedText
+    if (captionIndex !== -1) {
+      extractedText = result.substring(captionIndex + caption.length).trim()
+    } else {
+      extractedText = result.trim()
+    }
+    setCaption(extractedText)
+  }
+
+  const generateRandomText = () => {
+    const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    setRandomText(text)
+  }
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [],
     },
     maxFiles: 1,
-    onDrop: (acceptedFiles) => {
+    onDrop: async (acceptedFiles) => {
       setFiles(
         acceptedFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
+          Object.assign(file, { preview: URL.createObjectURL(file) })
         )
       )
+      const { fileUrl } = await upload.uploadFile(acceptedFiles[0])
+      await uploadComplete(fileUrl)
     },
   })
 
-  const style:  React.CSSProperties = useMemo(
+  const style: React.CSSProperties = useMemo(
     () => ({
       ...baseStyle,
     }),
     []
   )
-
   const thumbs = files.map((file) => (
-    <div style={thumb} key={file.name}>
-      <div style={thumbInner}>
-        <img
-          src={file.preview}
-          style={img}
-          onLoad={() => URL.revokeObjectURL(file.preview)}
-          alt={file.name}
-        />
+    <div style={thumbsContainer} key={file.name}>
+      <div style={thumb}>
+        <div style={thumbInner}>
+          <img
+            src={file.preview}
+            style={img}
+            onLoad={() => URL.revokeObjectURL(file.preview)}
+            alt={file.name}
+          />
+        </div>
+      </div>
+      <div style={captionStyle}>
+        <p>{caption}</p>
+      </div>
+      <div style={thirdContainer}>
+        <p>{randomText}</p>
       </div>
     </div>
   ))
@@ -98,6 +154,10 @@ export default function IndexPage() {
       files.forEach((file) => URL.revokeObjectURL(file.preview))
     }
   }, [files])
+
+  useEffect(() => {
+    generateRandomText()
+  }, [])
 
   return (
     <>
