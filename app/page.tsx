@@ -50,7 +50,7 @@ const thumbsContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",
-  margin: "0 5px", // Update this line
+  margin: "0 5px",
   flex: "1 1 33%",
 }
 
@@ -60,16 +60,14 @@ const captionStyle: React.CSSProperties = {
   alignItems: "center",
   margin: "16px 0",
   padding: 10,
-
 }
 
 const thirdContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  margin: "10px 0", // Update this line
-  flex: "1 1 33%", 
-
+  margin: "10px 0",
+  flex: "1 1 33%",
 }
 
 interface ExtendedFile extends File {
@@ -79,7 +77,7 @@ interface ExtendedFile extends File {
 export default function IndexPage() {
   const [files, setFiles] = useState<ExtendedFile[]>([])
   const [caption, setCaption] = useState("")
-  const [randomText, setRandomText] = useState("")
+  const [Text, setText] = useState("")
 
   const upload = Upload({
     apiKey: "public_12a1yDhFXdiwiqc5cp4roMGKbtde",
@@ -99,11 +97,12 @@ export default function IndexPage() {
       extractedText = result.trim()
     }
     setCaption(extractedText)
-  }
-
-  const generateRandomText = () => {
-    const text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-    setRandomText(text)
+    console.log("calling open ai ")
+    var answer = await axios.post("api/caption", {
+      text: extractedText,
+    })
+    console.log(answer)
+    setText(answer.data)
   }
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -128,6 +127,7 @@ export default function IndexPage() {
     }),
     []
   )
+
   const thumbs = files.map((file) => (
     <div style={thumbsContainer} key={file.name}>
       <div style={thumb}>
@@ -144,7 +144,7 @@ export default function IndexPage() {
         <p>{caption}</p>
       </div>
       <div style={thirdContainer}>
-        <p>{randomText}</p>
+        <p>{Text}</p>
       </div>
     </div>
   ))
@@ -154,10 +154,6 @@ export default function IndexPage() {
       files.forEach((file) => URL.revokeObjectURL(file.preview))
     }
   }, [files])
-
-  useEffect(() => {
-    generateRandomText()
-  }, [])
 
   return (
     <>
