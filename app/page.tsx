@@ -51,15 +51,14 @@ const thumbsContainer: React.CSSProperties = {
   flexDirection: "row",
   flexWrap: "wrap",
   margin: "0 5px",
-  flex: "1 1 33%",
+  flex: "1 1 50%",
 }
 
 const captionStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  margin: "16px 0",
-  padding: 10,
+  paddingRight: "100px",
 }
 
 const thirdContainer: React.CSSProperties = {
@@ -67,6 +66,8 @@ const thirdContainer: React.CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
   margin: "10px 0",
+  padding: 10,
+
   flex: "1 1 33%",
 }
 
@@ -101,7 +102,6 @@ export default function IndexPage() {
     var answer = await axios.post("api/caption", {
       text: extractedText,
     })
-    console.log(answer)
     setText(answer.data)
   }
 
@@ -140,12 +140,6 @@ export default function IndexPage() {
           />
         </div>
       </div>
-      <div style={captionStyle}>
-        <p>{caption}</p>
-      </div>
-      <div style={thirdContainer}>
-        <p>{Text}</p>
-      </div>
     </div>
   ))
 
@@ -162,7 +156,26 @@ export default function IndexPage() {
         <p>Drag 'n' drop some files here, or click to select files</p>
         <em>(Only *.jpeg and *.png images will be accepted)</em>
       </div>
-      <aside style={thumbsContainer}>{thumbs}</aside>
+      <div style={{ display: "flex", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginLeft: "100px",
+            width: "50%",
+          }}
+        >
+          <div style={thumbsContainer}>{thumbs}</div>
+          <div style={captionStyle}>
+            <p>{caption}</p>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", width: "50%", marginRight: "100px", }}>
+          <div style={thirdContainer}>
+            <p>{Text}</p>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
