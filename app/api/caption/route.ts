@@ -1,6 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
 import { OpenAIStream, StreamingTextResponse } from "ai"
-import { OpenAI } from "langchain/llms/openai"
 import { PromptTemplate } from "langchain/prompts"
 import { Configuration, OpenAIApi } from "openai-edge"
 
@@ -10,6 +8,8 @@ Your goal is to:
 - Generate upto 5 social media caption for a picture of the following description. 
 - Create an intriguing caption that sparks curiosity.
 - Create a caption with positive tone. 
+- Provide it as a numbered list.  
+- Include a " <br>" tag at the end of each caption.
 
 Here are some examples:
 -Lost in the beauty of the great outdoors, finding solace in nature's embrace. 🌿✨ #NatureTherapy #PeacefulEscape
@@ -33,20 +33,14 @@ const openai = new OpenAIApi(config)
 export const runtime = "edge"
 
 export async function POST(request: Request) {
-  console.log("In API")
   const res = await request.json()
   const text = res.prompt
-  // const Envir = process.env.OPENAI_API_KEY
-  // // const model = new OpenAI({ openAIApiKey: Envir, temperature: 0.9 })
   var promptTemplate = Template
   const prompt = new PromptTemplate({
     template: promptTemplate,
     inputVariables: ["text"],
   })
   const promptText = await prompt.format({ text: text })
-  // const modelresponse = await model.call(promptText)
-  // console.log(modelresponse)
-  // return NextResponse.json(modelresponse)
   const response = await openai.createCompletion({
     model: "text-davinci-003",
     stream: true,
@@ -57,5 +51,7 @@ export async function POST(request: Request) {
 
   const stream = OpenAIStream(response)
 
-  return new StreamingTextResponse(stream)
+  return new StreamingTextResponse(stream, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  })
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { FormEvent, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useCompletion } from "ai/react"
 import axios from "axios"
 import { useDropzone } from "react-dropzone"
@@ -10,17 +10,17 @@ const baseStyle: React.CSSProperties = {
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
   padding: "20px",
   borderWidth: 2,
-  borderRadius: 2,
-  borderColor: "#eeeeee",
+  borderRadius: 4,
+  borderColor: "black",
   borderStyle: "dashed",
-  backgroundColor: "#fafafa",
-  color: "#bdbdbd",
   outline: "none",
   transition: "border .24s ease-in-out",
-  margin: 50,
+  marginTop: "10px",
+  marginRight: "35px",
+  width: "auto",
+  alignItems: "center",
 }
 
 const thumb: React.CSSProperties = {
@@ -28,7 +28,6 @@ const thumb: React.CSSProperties = {
   borderRadius: 2,
   border: "1px solid #eaeaea",
   marginBottom: 8,
-  marginLeft: 50,
   width: "auto",
   height: "auto",
   padding: 4,
@@ -43,33 +42,33 @@ const thumbInner = {
 
 const img = {
   display: "block",
-  width: 400,
-  height: 400,
+  width: 650,
+  height: 450,
 }
 
 const thumbsContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "row",
-  flexWrap: "wrap",
-  margin: "0 5px",
-  flex: "1 1 50%",
+  marginTop: "10px",
 }
 
 const captionStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  paddingRight: "100px",
+  marginTop: "20px",
+  fontSize: "1.1em",
 }
 
 const thirdContainer: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  margin: "10px 0",
   padding: 10,
+  fontSize: "1.1em",
+  marginTop: "20px",
+}
 
-  flex: "1 1 33%",
+const heading: React.CSSProperties = {
+  fontSize: "2em",
 }
 
 interface ExtendedFile extends File {
@@ -77,9 +76,18 @@ interface ExtendedFile extends File {
 }
 
 export default function IndexPage() {
-  const [files, setFiles] = useState<ExtendedFile[]>([])
-  const [caption, setCaption] = useState("")
-  const [Text, setText] = useState("")
+  const defaultImageUrl =
+    "https://replicate.delivery/mgxm/f4e50a7b-e8ca-432f-8e68-082034ebcc70/demo.jpg"
+  const [files, setFiles] = useState([
+    {
+      name: "default-image",
+      preview: defaultImageUrl,
+    },
+  ])
+  const [caption, setCaption] = useState(
+    "a woman sitting on the beach with a dog"
+  )
+  const [isLoad, setIsLoad] = useState(false)
 
   const { complete, completion, isLoading } = useCompletion({
     api: "/api/caption",
@@ -102,8 +110,8 @@ export default function IndexPage() {
     } else {
       extractedText = result.trim()
     }
+    setIsLoad(false)
     setCaption(extractedText)
-    console.log(extractedText)
     console.log("calling open ai ")
     complete(extractedText)
   }
@@ -119,6 +127,7 @@ export default function IndexPage() {
           Object.assign(file, { preview: URL.createObjectURL(file) })
         )
       )
+      setIsLoad(true)
       const { fileUrl } = await upload.uploadFile(acceptedFiles[0])
       await uploadComplete(fileUrl)
     },
@@ -152,35 +161,58 @@ export default function IndexPage() {
     }
   }, [files])
 
+  const page: React.CSSProperties = {
+    display: "flex",
+    width: "100%",
+  }
+
+  const formatApiResult = (result: any) => {
+    if (result && result.data) {
+      const formattedResult = result.data.replace(/-/g, "-\n")
+      console.log(formattedResult)
+      return formattedResult
+    }
+    return ""
+  }
+
   return (
     <>
-      <div {...getRootProps({ style })}>
-        <input {...getInputProps()} />
-        <p>Drag and drop some files here or click to select files</p>
-        <em>(Only *.jpeg and *.png images will be accepted)</em>
-      </div>
-      <div style={{ display: "flex", width: "100%" }}>
+      <div style={page}>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             marginLeft: "100px",
             width: "50%",
+            marginTop: "20px",
           }}
         >
+          <h1 style={heading}>Input</h1>
           <div style={thumbsContainer}>{thumbs}</div>
-          <div style={captionStyle}>
-            <p>{caption}</p>
+          <div {...getRootProps({ style })}>
+            <input {...getInputProps()} />
+            <p>Drag and drop some files here or click to select files</p>
+            <em>(Only *.jpeg and *.png images will be accepted)</em>
           </div>
         </div>
+
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             width: "50%",
-            marginRight: "100px",
+            marginRight: "50px",
+            marginTop: "20px",
           }}
         >
+          <h2 style={heading}>Output</h2>
+          <div style={captionStyle}>
+            {isLoad ? (
+              <div>Generating image description...</div>
+            ) : (
+              <p>Description: {caption}</p>
+            )}
+          </div>
           <div style={thirdContainer}>
             <p>{completion}</p>
           </div>
