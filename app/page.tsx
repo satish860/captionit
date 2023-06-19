@@ -21,6 +21,7 @@ const baseStyle: React.CSSProperties = {
   marginRight: "35px",
   width: "auto",
   alignItems: "center",
+  color: "black",
 }
 
 const thumb: React.CSSProperties = {
@@ -164,6 +165,7 @@ export default function IndexPage() {
   const page: React.CSSProperties = {
     display: "flex",
     width: "100%",
+    color: "black",
   }
 
   const formatApiResult = (result: any) => {
