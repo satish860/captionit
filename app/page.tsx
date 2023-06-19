@@ -58,6 +58,7 @@ const captionStyle: React.CSSProperties = {
   flexDirection: "column",
   marginTop: "20px",
   fontSize: "1.1em",
+  color: "black"
 }
 
 const thirdContainer: React.CSSProperties = {
@@ -66,10 +67,12 @@ const thirdContainer: React.CSSProperties = {
   padding: 10,
   fontSize: "1.1em",
   marginTop: "20px",
+  color: "black"
 }
 
 const heading: React.CSSProperties = {
   fontSize: "2em",
+  color: "black",
 }
 
 interface ExtendedFile extends File {
