@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { FormEvent, useEffect, useMemo, useState } from "react"
+import { useCompletion } from "ai/react"
 import axios from "axios"
 import { useDropzone } from "react-dropzone"
 import { Upload } from "upload-js"
@@ -80,6 +81,10 @@ export default function IndexPage() {
   const [caption, setCaption] = useState("")
   const [Text, setText] = useState("")
 
+  const { complete, completion, isLoading } = useCompletion({
+    api: "/api/caption",
+  })
+
   const upload = Upload({
     apiKey: "public_12a1yDhFXdiwiqc5cp4roMGKbtde",
   })
@@ -98,11 +103,9 @@ export default function IndexPage() {
       extractedText = result.trim()
     }
     setCaption(extractedText)
+    console.log(extractedText)
     console.log("calling open ai ")
-    var answer = await axios.post("api/caption", {
-      text: extractedText,
-    })
-    setText(answer.data)
+    complete(extractedText)
   }
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -153,7 +156,7 @@ export default function IndexPage() {
     <>
       <div {...getRootProps({ style })}>
         <input {...getInputProps()} />
-        <p>Drag 'n' drop some files here, or click to select files</p>
+        <p>Drag and drop some files here or click to select files</p>
         <em>(Only *.jpeg and *.png images will be accepted)</em>
       </div>
       <div style={{ display: "flex", width: "100%" }}>
@@ -170,9 +173,16 @@ export default function IndexPage() {
             <p>{caption}</p>
           </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", width: "50%", marginRight: "100px", }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "50%",
+            marginRight: "100px",
+          }}
+        >
           <div style={thirdContainer}>
-            <p>{Text}</p>
+            <p>{completion}</p>
           </div>
         </div>
       </div>

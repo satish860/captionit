@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { OpenAIStream, StreamingTextResponse } from "ai"
 import { OpenAI } from "langchain/llms/openai"
 import { PromptTemplate } from "langchain/prompts"
+import { Configuration, OpenAIApi } from "openai-edge"
 
 const Template = `
 Below is a description of the picture.
@@ -22,18 +24,38 @@ sentence: {text}
 YOUR RESPONSE:
 `
 
-export async function POST(request: NextRequest) {
+const config = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
+const openai = new OpenAIApi(config)
+
+export const runtime = "edge"
+
+export async function POST(request: Request) {
+  console.log("In API")
   const res = await request.json()
-  const text = res.text
-  const Envir = process.env.OPENAI_API_KEY
-  const model = new OpenAI({ openAIApiKey: Envir, temperature: 0.9 })
+  const text = res.prompt
+  // const Envir = process.env.OPENAI_API_KEY
+  // // const model = new OpenAI({ openAIApiKey: Envir, temperature: 0.9 })
   var promptTemplate = Template
   const prompt = new PromptTemplate({
     template: promptTemplate,
-    inputVariables: ['text'],
+    inputVariables: ["text"],
   })
   const promptText = await prompt.format({ text: text })
-  const modelresponse = await model.call(promptText)
-  console.log(modelresponse)
-  return NextResponse.json(modelresponse)
+  // const modelresponse = await model.call(promptText)
+  // console.log(modelresponse)
+  // return NextResponse.json(modelresponse)
+  const response = await openai.createCompletion({
+    model: "text-davinci-003",
+    stream: true,
+    temperature: 0.9,
+    prompt: promptText,
+    max_tokens: 1000,
+  })
+
+  const stream = OpenAIStream(response)
+
+  return new StreamingTextResponse(stream)
 }
