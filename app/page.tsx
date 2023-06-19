@@ -174,9 +174,9 @@ export default function IndexPage() {
 
   const formatApiResult = (result: any) => {
     if (result) {
-      const formattedResult = result.replace(/-/g, "<br>")
+      const formattedResult = result.replace(/-/g, "<p class='mb-5'>")
       const lineSpacingStyle = {
-        lineHeight: "1.5", // Adjust the line height to control the space formed by <br>
+        lineHeight: "1.5", 
       }
       return (
         <div
