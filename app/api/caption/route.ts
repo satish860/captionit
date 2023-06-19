@@ -8,8 +8,6 @@ Your goal is to:
 - Generate upto 5 social media caption for a picture of the following description. 
 - Create an intriguing caption that sparks curiosity.
 - Create a caption with positive tone. 
-- Provide it as a numbered list.  
-- Include a " <br>" tag at the end of each caption.
 
 Here are some examples:
 -Lost in the beauty of the great outdoors, finding solace in nature's embrace. 🌿✨ #NatureTherapy #PeacefulEscape

@@ -58,7 +58,7 @@ const captionStyle: React.CSSProperties = {
   flexDirection: "column",
   marginTop: "20px",
   fontSize: "1.1em",
-  color: "black"
+  color: "black",
 }
 
 const thirdContainer: React.CSSProperties = {
@@ -66,8 +66,8 @@ const thirdContainer: React.CSSProperties = {
   flexDirection: "column",
   padding: 10,
   fontSize: "1.1em",
-  marginTop: "20px",
-  color: "black"
+  marginTop: "10px",
+  color: "black",
 }
 
 const heading: React.CSSProperties = {
@@ -93,7 +93,7 @@ export default function IndexPage() {
   )
   const [isLoad, setIsLoad] = useState(false)
 
-  const { complete, completion, isLoading } = useCompletion({
+  const { complete, completion, setCompletion, isLoading } = useCompletion({
     api: "/api/caption",
   })
 
@@ -131,6 +131,7 @@ export default function IndexPage() {
           Object.assign(file, { preview: URL.createObjectURL(file) })
         )
       )
+      setCompletion("")
       setIsLoad(true)
       const { fileUrl } = await upload.uploadFile(acceptedFiles[0])
       await uploadComplete(fileUrl)
@@ -172,12 +173,18 @@ export default function IndexPage() {
   }
 
   const formatApiResult = (result: any) => {
-    if (result && result.data) {
-      const formattedResult = result.data.replace(/-/g, "-\n")
-      console.log(formattedResult)
-      return formattedResult
+    if (result) {
+      const formattedResult = result.replace(/-/g, "<br>")
+      const lineSpacingStyle = {
+        lineHeight: "1.5", // Adjust the line height to control the space formed by <br>
+      }
+      return (
+        <div
+          style={lineSpacingStyle}
+          dangerouslySetInnerHTML={{ __html: formattedResult }}
+        />
+      )
     }
-    return ""
   }
 
   return (
@@ -219,7 +226,7 @@ export default function IndexPage() {
             )}
           </div>
           <div style={thirdContainer}>
-            <p>{completion}</p>
+            <p>{formatApiResult(completion)}</p>
           </div>
         </div>
       </div>
